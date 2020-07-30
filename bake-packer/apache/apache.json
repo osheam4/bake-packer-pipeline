@@ -1,0 +1,57 @@
+{
+    "variables": {
+        "accounts": "",
+        "version": "",
+        "env": "{{ env `ENV` }}",
+        "application": "{{ env `APPLICATION` }}"
+    },
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "region": "eu-west-1",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "amzn2-ami-hvm-2.0.*-gp2",
+                    "root-device-type": "ebs"
+                },
+                "owners": ["amazon"],
+                "most_recent": true
+            },
+            "instance_type": "t2.micro",
+            "ssh_username": "ec2-user",
+            "ssh_interface": "public_ip",
+            "ami_name": "{{ user `env` }}-{{ user `application` }}-{{isotime \"20060102\"}}-{{timestamp}}",
+            "communicator": "ssh",
+            "vpc_id": "vpc-9cf3d8f8",
+            "subnet_id": "subnet-177e4161",
+            "tags": {
+                "Name": "{{ user `env` }}-{{ user `application` }}"
+            }
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "chef-solo",
+            "version": "12.13",
+            "execute_command": "{{if .Sudo}}sudo {{end}}chef-solo --version"
+        },
+        {
+            "type": "ansible",
+            "user": "ec2-user",
+            "playbook_file": "./ansible/playbooks/{{ user `application` }}/{{ user `application` }}.yml",
+            "extra_arguments": [
+                "--extra-vars", "env={{ user `env` }} application={{ user `application` }}"
+            ],
+            "inventory_directory": "./ansible/inventories/",
+            "groups": [ "{{ user `application` }}" ]
+        }
+    ],
+    "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
+    }
+  ]
+}

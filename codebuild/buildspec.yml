@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  variables:
+    REGION: eu-west-1
+
+phases:
+  install:
+    commands:
+      - echo checking virtualenv
+      - virtualenv .ansible
+      - source .ansible/bin/activate . && pip install -r requirements.txt
+      - echo "Installing Packer"
+      - curl -o packer.zip https://releases.hashicorp.com/packer/1.6.0/packer_1.6.0_linux_amd64.zip && unzip packer.zip
+
+  pre_build:
+    commands:
+      - ls -latr
+      # - SUBNETA=$(aws cloudformation list-exports --query "Exports[?Name == 'VpcSubPrivAppA'].Value" --output text)
+ 
+  build:
+    commands:
+      - echo "Validating Packer template"
+      - ./packer validate -var-file bake-packer/vars/${ENV}.json bake-packer/${APPLICATION}/${APPLICATION}.json
+      - ./packer build -var-file bake-packer/vars/${ENV}.json bake-packer/${APPLICATION}/${APPLICATION}.json

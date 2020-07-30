@@ -1,0 +1,12 @@
+# - hosts: all
+#   - name: print vars
+#     debug:
+#       msg: 'group_vars={{ cloudwatch }}'
+
+- hosts: all
+  become: yes
+  become_user: root
+  become_flags: 'su - root /bin/bash -c'
+  roles:
+    - cloudwatch
+    - apache

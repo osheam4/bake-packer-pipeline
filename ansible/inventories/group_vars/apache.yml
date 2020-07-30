@@ -1,0 +1,5 @@
+cloudwatch:
+  logs_location: /var/log/httpd
+  log_files:
+  - error_log
+  - access_log

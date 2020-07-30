@@ -1,0 +1,12 @@
+- name: Install cloudwatch agent
+  yum:
+    name: https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+    state: present
+  become: yes
+
+- name: Create the Cloudwatch agent config file
+  template:
+    dest: /opt/aws/amazon-cloudwatch-agent/bin/config.json
+    src: config.json.j2
+  notify: start cloudwatch agent
+  become: yes
